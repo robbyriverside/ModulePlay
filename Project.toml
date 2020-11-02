@@ -1,0 +1,8 @@
+name = "ModulePlay"
+uuid = "f261805d-b5ba-4bd2-b51c-0845505a2eff"
+authors = ["Rob Farrow <rob@toonavox.com>"]
+version = "0.1.0"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
