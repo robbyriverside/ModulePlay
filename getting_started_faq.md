@@ -4,6 +4,8 @@ The goal of this document is to get you up to speed using Julia development tool
 
 This document is organized like an FAQ.  But it is designed to be read from beginning to end for the developer new to Julia.  The FAQ structure also makes it a handy reference.
 
+Code lines that begin with `$` are typed at the operating system's shell; code lines that begin with `julia>`, `shell>`, or `pkg>` are entered into a Julia session.
+
 # The REPL
 
 The REPL (Read Eval Print Loop) is really three tools in one.  It lets you type julia expressions, access the package manager and the system command line.
@@ -23,7 +25,7 @@ If you are using Windows, you will need to type 'powershell' before any commands
 
 ## 3. How can I use the package manager inside the REPL?
 
-Just type closing square-braket (']') that will drop you into the Pkg manager.  Backspace returns you to the REPL.
+Just type closing square-braket (']') that will drop you into the Pkg manager.  Backspace, entered as the first character of the line, or Ctrl-C returns you to the REPL.
 
 ## 4. How can I reload packages that have changed inside the REPL?
 
@@ -45,26 +47,42 @@ No.  Other than the two depdendency files, you can structure it however you wish
 
 Activating a project will load the dependencies from the Project.toml and Manifest.toml files.  The REPL keeps track of where these files are, so you can add further dependencies to them.
 
-    pkg> activate $HOME/julia/ModulePlay      # activates the example project
-    julia --project=$HOME/julia/ModulePlay    # start REPL with ModulePlay project activated
+    pkg> activate $HOME/julia/ModulePlay       # activates the example project
+
+or
+
+    $ julia --project=$HOME/julia/ModulePlay    # start REPL with ModulePlay project activated
 
 There are two ways for Julia to run within your project and track your project dependencies: the package activate command and passing --project argument to Julia.  In either case, you pass the path to the project, so Julia can locate the Project and Manifest files.
 
-## 4. How do I run my project within current folder?
+There are two helpful specializations of this syntax. Like the example above, you can perform the activation either from within Julia or when you launch Julia.
+
+### Running a project within the current folder
 
     pkg> activate .      # activates the project from the current folder (pwd)
-    julia --project=.    # start REPL while activating the project in the current folder (pwd)
+    $ julia --project=.    # start REPL while activating the project in the current folder (pwd)
 
 A common way of using packages is to pass a dot (".") meaning the current folder (pwd).  But that means you need to be inside the project root folder when you call activate or start Julia passing dot to the --project argument.  Once the Julia REPL reads the project files, it knows where they are, so you are not required to stay in the root folder of the project.
 
-## 5. How do I run my project from anywhere inside the project folder tree?
+### Running my project from anywhere inside the project folder tree
 
     pkg> activate @.      # activates the project anywhere below the project root folder
-    julia --project=@.    # start REPL while activating the project anywhere below the root folder
+    $ julia --project=@.    # start REPL while activating the project anywhere below the root folder
 
 Another handy way is to activate a project is to pass at-sign dot ("@.") to the activate command or --project argument.  This means if you are anywhere within the project folders it will look up the tree to find the dependency files.  This helps when you don't happen to be in the root folder when you activate.
 
-## 6. What is a good way to start out organizing my project?
+## 4. What is a good way to start out organizing my project?
+
+The easiest approach is to use PkgTemplates:
+
+    pkg> add PkgTemplates      # needed only if you haven't already added PkgTemplates previously
+    julia> using PkgTemplates
+    julia> t = Template()      # there are many customizations possible, see https://invenia.github.io/PkgTemplates.jl/stable/
+    julia> t("MyModule")
+ 
+This creates the default package structure, populating it with `src/` and `test/` directories, a `Project.toml` file, a `LICENSE` file (defaulting to the open-source MIT license), an empty `README.md`, and a few commonly-used GitHub [workflows](https://developer.github.com/v3/actions/workflows/).
+
+If you prefer to exercise more manual control, you can alternatively use
 
     pkg> generate MyModule     # creates the root folder with project file and src folder
 
@@ -74,7 +92,15 @@ The package generate command will create your dependency file (Project.toml) and
 
     pkg> add Dates         # adding the Dates module and its dependencies
 
-The package add command, will place references to the dependent modules into the project and manifest files.  You can also pass the full repo path (ie "gethub/..." ) and it will download the code for you.
+The package add command, will place references to the dependent modules into the active project and manifest files. By default this is your global environment, but you can use the `activate` or `--project` commands above to ensure this dependency gets added to your project.
+
+You can also pass the full repo path (ie "gethub/..." ) and it will download the code for you.
+
+For project reproducibility and longevity, it is recommended that you add [`[compat]` directives](https://julialang.github.io/Pkg.jl/v1/compatibility/) for each dependency, bounding the version numbers from below and above. This will help ensure that your project continues to work even if breaking changes get made in some of your dependencies. You can determine the version numbers currently in use with
+
+    pkg> st                # short for "status"
+
+perhaps after `pkg> instantiate`ing any new dependencies.
 
 # ModulePlay project example
 
